@@ -32,11 +32,6 @@ def main():
                   bgColor = np.array([0.4, 0.4, 0.4]))
 
     # Loading the scene
-
-    #indexedTest(viewer)
-    #dynamicTest(viewer)
-    #rodTest(viewer)
-
     sphere_test(viewer)
 
     # Main loop

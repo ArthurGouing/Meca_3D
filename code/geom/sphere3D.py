@@ -112,24 +112,20 @@ class Sphere3D(RigidBody3D):
         self.contact = contact_list
         self.points_of_contacts = contact_points
         self.is_contact = True
-        print("dans in_contact", contact_list)
         f = np.array([0., 0., 0.])
         m = np.array([0., 0., 0.])
         for obj, q  in zip(contact_list, contact_points):
             print(self.contact_force(obj, q, dt))
             [f, m] = np.add([f, m], self.contact_force(obj, q, dt))
-        print("force dans le in_contact", f)
-        print("moment dans in_contact", m)
         self.force_contact = f
         self.moment_contact = m
         return
 
 
     def advance(self, dt):
-        # w_R1 = np.dot(self.R.transpose(), self.w_R0) # c'est le Grand Omega du cours
         # Initialize dq and force
         self.w_R1 =  np.dot(self.rotation.transpose(), self.w_R0)
-        dq = np.array([*self.V, *self.w_R1], np.float64)  # dq c'est q point en fait
+        dq = np.array([*self.V, *self.w_R1], np.float64) 
         f =  self.force
         f += self.force_contact
         f += self.air_friction()
@@ -165,23 +161,7 @@ class Sphere3D(RigidBody3D):
             self.w_R1 = dq[3:]
         self.w_R0 = np.dot(self.rotation, self.w_R1)
 
-        # print("Grand Omega : ", w_R1)
-        # print("dq = ", dq)
-        # print("F = ", F)
-        # print("L = \n", L)
-        # print("H = \n", H)
-
-        #print("Position: ", self.center)
-        ###print("Rotation: \n", self.rotation)
-        ###print("Rotation transpose: \n", self.rotation.transpose())
-        print("Velocity: ", self.V)
-        #print("w_R0 : ", self.w_R0)
-        print("w_R1 : ", self.w_R1)
         Energie = self.mass*(1./2. * np.linalg.norm(self.V)**2 + 9.81*(self.center[2] - self.radius))
-        print("Energie : ", Energie)
-        #print("")
-        #print("")
-        #exit()
 
     def contact_force(self, obj, q, dt): # q est le point de contact
         if obj == "sol":
@@ -192,25 +172,19 @@ class Sphere3D(RigidBody3D):
 
         else: # else c'est une sphere
             direction = (self.center - obj.center) / np.linalg.norm(obj.center-self.center)
-            #d = abs((self.center - obj.center) - (obj.radius + self.radius))
             print(obj.radius + self.radius, self.center - obj.center, np.linalg.norm(self.center - obj.center))
             d = (obj.radius + self.radius) - np.linalg.norm(self.center - obj.center)
-            print("pour l'object en position", self)
             maxD = self.deq + 1 * np.linalg.norm(self.V) * 10**(-6)
             mu = 1.0
         d = min(d, maxD)
-        print("d", d)
         f = 4./3. * self.young_modulus_norm * sqrt(self.radius) * pow(d, 3./2.)
         # force tangentielle
         ds = self.calcul_ds(obj, dt)
         ft = 4./3. * self.young_modulus_norm * sqrt(self.radius) * pow(np.linalg.norm(ds), 3./2.)
-        print("f_adérance et f_glissement :", ft, mu*f)
         ft = min(ft, mu*f)
         dir_ft = ds/np.linalg.norm(ds)
         m = self.calcul_moment_contact(obj, dt, ft)
         f = f*direction #+ ft*dir_ft
-        print(f"force de contact au point {q} : \n f = {f}")
-        print(f"moment au point {q} : \n m = {m}")
         return [f, m]
 
     def air_friction(self):
@@ -218,29 +192,12 @@ class Sphere3D(RigidBody3D):
         rho = self.mass / (4*pi*(self.radius**3)/3)
         s = pi * (self.radius**2)
         f = - np.multiply(cx * rho * s * np.linalg.norm(self.V), self.V)
-        print("frottement", f)
         if self.center[2] < self.radius:
             return f
         else:
             return 0
 
     def calcul_ds(self, obj, dt):
-        #ds = 0
-        #if "sol" in self.contact:
-        #    if self.previous_pos[2] != self.center[2]:
-        #        tsol = (self.radius - self.previous_pos[2]) / (self.center[2] - self.previous_pos[2])
-        #        psol = np.multiply(1-tsol, self.previous_pos) + np.multiply(tsol, self.center)
-        #        d = min(self.radius - self.center[2], self.deq)
-        #        if self.deq < self.radius - self.center[2]:
-        #            tmax = (self.radius - self.deq - self.previous_pos[2]) / (self.center[2] - self.previous_pos[2])
-        #            pmax = np.multiply(1-tmax, self.previous_pos) + np.multiply(tmax, self.center)
-        #        else :
-        #            pmax = self.center
-        #        dssqr = np.linalg.norm(pmax - psol)**2 - d **2
-        #        if dssqr < 0:
-        #            ds = 0
-        #        else :
-        #            ds = sqrt(np.linalg.norm(pmax - psol)**2 - d **2)
         if obj =="sol":
             ub = np.zeros(3)
             d  = np.array([.0, .0, -1.])
