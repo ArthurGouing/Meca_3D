@@ -3,7 +3,7 @@
 
 Meca 3D is a real-time collision simulator 
 This is a simple python OpenGL viewer designed to have a quick visualization of the results of the simulations. The goal is *not* to do efficient/marvelous renderings, although you can tune a bit the viewer if you want.
-Please Open the `Meca Num.pdf` to have a detail presentation of the project.
+Please Open the `Meca Num.pptx` to have a detail presentation of the project.
 
 ## Authors
 
